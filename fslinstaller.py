@@ -32,7 +32,7 @@ code = locale.getpreferredencoding()
 try:
     import json
     HAS_JSON = True
-except:
+except Exception:
     HAS_JSON = False
 
 fsli_C_FAILED = 1
@@ -167,10 +167,12 @@ class Version(object):
         return True
 
 
-version = Version('3.0.11')
+version = Version('3.0.16')
 
 
-def memoize(f, cache={}):
+def memoize(f):
+    cache = f.cache = {}
+
     def g(*args, **kwargs):
         key = (f, tuple(args), frozenset(kwargs.items()))
         if key not in cache:
@@ -384,7 +386,7 @@ def run_cmd_dropstdout(command, as_root=False):
             cmd.stdin.write(sudo_pwd + '\n')
             cmd.stdin.flush()
         (_, error) = cmd.communicate()
-    except:
+    except Exception:
         raise
     finally:
         my_spinner.stop()
@@ -416,7 +418,7 @@ def run_cmd(command, as_root=False):
             cmd.stdin.write(sudo_pwd + '\n')
             cmd.stdin.flush()
         (output, error) = cmd.communicate()
-    except:
+    except Exception:
         raise
     finally:
         my_spinner.stop()
@@ -655,7 +657,7 @@ def move_file(from_file, to_file, requires_root=False):
                     os.remove(from_file)
             else:
                 raise
-        except:
+        except Exception:
             raise
 
 
@@ -729,6 +731,8 @@ class CreateFileError(Exception):
 
 def create_file(fname, lines, requires_root):
     '''Create a new file containing lines given'''
+    if isinstance(lines, basestring):
+        lines = lines.split('\n')
     try:
         (tmpfile, tmpfname) = temp_file_name(mode='w')
 
@@ -963,7 +967,7 @@ def download_file(url, localf, timeout=20):
         try:
             try:
                 lf = open(localf, 'ab')
-            except:
+            except Exception:
                 raise DownloadFileError("Failed to create temporary file.")
 
             while True:
@@ -1029,8 +1033,8 @@ def fastest_mirror(main_mirrors, mirrors_file, timeout=20):
                 MsgUser.debug("Time out trying %s" % (m_url))
                 raise SiteNotResponding(m)
             else:
-                MsgUser.debug(e.reason.args[1])
-                raise SiteNotResponding(e.reason.args[1])
+                MsgUser.debug(str(e.reason))
+                raise SiteNotResponding(str(e.reason))
         except socket.timeout, e:
             MsgUser.debug(e)
             raise SiteNotResponding(str(e))
@@ -1383,46 +1387,25 @@ def get_releases(server_url):
         raise UnsupportedOs("%s %s not supported by this installer" % (
             computer.o_s, computer.vendor
         ))
-    if 'alias' in os_definition.keys():
-        t_version = computer.version.major
-        while t_version > 0:
-            MsgUser.debug("Trying version %s" % (t_version))
-            try:
-                os_parent = os_definition['alias'][
-                        str(t_version)]['parent']
-                break
-            except KeyError:
-                MsgUser.debug("...not found")
-                if t_version == (computer.version.major - 1):
-                    MsgUser.warning(
-                        "%s %s not officially supported "
-                        "- trying to locate support for an earlier version - "
-                        "this may not work" % (
-                            computer.vendor, computer.version.major))
-                t_version -= 1
-        if t_version == 0:
-            raise UnsupportedOs("%s %s not supported" % (
-                computer.vendor,
-                str(computer.version.major)
-            ))
-        os_definition = manifest[computer.o_s][os_parent]
+    t_version = computer.version.major
+    alias_t = 'alias'
+    if alias_t in os_definition.keys():
+        if str(t_version) in os_definition[alias_t]:
+            os_parent = os_definition[alias_t][
+                            str(t_version)]['parent']
+            os_definition = manifest[computer.o_s][os_parent]
+
     if computer.arch not in os_definition.keys():
         raise UnsupportedOs("%s %s not supported" % (
                                 computer.vendor,
                                 computer.arch
-                             ))
-    os_versions = os_definition[computer.arch]
-    t_version = computer.version.major
+                            ))
+
+    os_def = os_definition[computer.arch]
     while t_version > 0:
         MsgUser.debug("Trying version %s" % (t_version))
-        if str(t_version) not in os_versions.keys():
+        if str(t_version) not in os_def.keys():
             MsgUser.debug("...not found")
-            if t_version == (computer.version.major - 1):
-                MsgUser.warning(
-                    "%s %s not officially supported "
-                    "- trying to locate support for an earlier version - "
-                    "this may not work" % (
-                            computer.vendor, computer.version.major))
             t_version -= 1
         else:
             break
@@ -1431,7 +1414,13 @@ def get_releases(server_url):
                                 computer.vendor,
                                 computer.version.major
                                 ))
-    return os_versions[str(t_version)]
+    elif t_version != computer.version.major:
+        MsgUser.warning(
+                        "%s %s not officially supported "
+                        "- trying to locate support for an earlier "
+                        "version - this may not work" % (
+                                computer.vendor, computer.version.major))
+    return os_definition[computer.arch][str(t_version)]
 
 
 class ExtraDownloadError(Exception):
@@ -1836,7 +1825,7 @@ def download_release(
                         "Erasing existing file %s" % local_filename)
                     try:
                         os.remove(local_filename)
-                    except:
+                    except Exception:
                         raise DownloadError(
                             "Unabled to remove local file %s - remove"
                             " it and try again" % local_filename)
@@ -1925,7 +1914,7 @@ endif'''
         replace = "setenv FSLDIR %s"
     elif shell == 'matlab':
         env_lines = '''
-% FSL Setup
+%% FSL Setup
 setenv( 'FSLDIR', '%s' );
 fsldir = getenv('FSLDIR');
 fsldirmpath = sprintf('%%s/etc/matlab',fsldir);
@@ -2093,7 +2082,7 @@ def setup_system_environment(fsldir):
             else:
                 # Create the file
                 try:
-                    create_file(profile, lines, sudo)
+                    create_file(this_profile, lines, sudo)
                 except CreateFileError, e:
                     exceptions.append(str(e))
 
@@ -2592,10 +2581,10 @@ def do_install(options, settings):
                     MsgUser.debug(str(e))
                     MsgUser.failed(
                         "Failed to configure system-wide profiles "
-                        "with FSL settings: " % (str(e)))
+                        "with FSL settings: %s" % (str(e)))
                 except SetupEnvironmentSkip, e:
                     MsgUser.skipped(
-                        "Some shells already configured: " % (str(e)))
+                        "Some shells already configured: %s" % (str(e)))
                 else:
                     MsgUser.debug("System-wide profiles setup.")
                     MsgUser.ok("System-wide FSL configuration complete.")
@@ -2605,7 +2594,7 @@ def do_install(options, settings):
         elif my_uid != 0:
             # Setup the environment for the current user
             try:
-                setup_environment(fsldir, matlab)
+                setup_environment(fsldir, with_matlab=matlab)
             except SetupEnvironmentError, e:
                 MsgUser.debug(str(e))
                 MsgUser.failed(str(e))
@@ -2747,42 +2736,43 @@ FSL in.'''
             return
 
         fsldir = get_fsldir(specified_dir=options.d_dir, install=True)
+        reinstall = True
         if os.path.exists(fsldir):
             inst_version = get_installed_version(fsldir)
             if inst_version == version:
                 reinstall = Settings.inst_qus.ask_question('version_match')
-                if not reinstall:
-                    return
-        (fname, version, details) = download_release(
-            to_temp=True,
-            request_version=options.requestversion,
-            skip_verify=options.skipchecksum)
-        if not details['supported']:
+        if reinstall:
+            (fname, version, details) = download_release(
+                to_temp=True,
+                request_version=options.requestversion,
+                skip_verify=options.skipchecksum)
+            if not details['supported']:
+                MsgUser.debug(
+                    "This OS is not officially supported -"
+                    " you may experience issues"
+                )
             MsgUser.debug(
-                "This OS is not officially supported -"
-                " you may experience issues"
-            )
-        MsgUser.debug(
-            "Installing %s from %s (details: %s)" % (fname, version, details))
-        MsgUser.message(
-            "Installing FSL software version %s..." % (version))
-        install_archive(
-            archive=fname, fsldir=fsldir)
-        try:
-            safe_delete(fname)
-        except SafeDeleteError, e:
-            MsgUser.debug(
-                "Unable to delete downloaded package %s ; %s" % (
-                    fname, str(e)))
-        if details['notes']:
-            MsgUser.message(details['notes'])
-        try:
-            post_install(
-                fsldir=fsldir, settings=settings,
-                quiet=options.quiet, x11=x11,
-                app_links=application_links)
-        except PostInstallError, e:
-            raise InstallError(str(e))
+                "Installing %s from %s (details: %s)" % (
+                    fname, version, details))
+            MsgUser.message(
+                "Installing FSL software version %s..." % (version))
+            install_archive(
+                archive=fname, fsldir=fsldir)
+            try:
+                safe_delete(fname)
+            except SafeDeleteError, e:
+                MsgUser.debug(
+                    "Unable to delete downloaded package %s ; %s" % (
+                        fname, str(e)))
+            if details['notes']:
+                MsgUser.message(details['notes'])
+            try:
+                post_install(
+                    fsldir=fsldir, settings=settings,
+                    quiet=options.quiet, x11=x11,
+                    app_links=application_links)
+            except PostInstallError, e:
+                raise InstallError(str(e))
 
     except DownloadError, e:
         MsgUser.debug("Unable to download FSL %s" % (str(e)))

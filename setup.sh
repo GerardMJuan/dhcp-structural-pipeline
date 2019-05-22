@@ -3,6 +3,9 @@
 packages="WORKBENCH ITK VTK MIRTK SPHERICALMESH"
 vars="dir install git branch version folder build cmake_flags make_flags"
 
+# need to point this somewhere to catch log output before we set up the
+# correct value
+logfile=/dev/null
 
 usage()
 {
@@ -30,8 +33,6 @@ Options:
 "
   exit;
 }
-
-
 
 # echo with color, prints in the terminal and the log file
 echo_color(){
@@ -97,16 +98,21 @@ done
 cxx_compiler=g++
 c_compiler=gcc
 
-# workbench 1.2.2 at least needs gcc5
+# the vtk/itk versions we are tied to need gcc5
 # check if g++-5/gcc-5 exist or if g++/gcc are of version 5
 compiler_version_required=5
-for compiler in cxx_compiler c_compiler;do
+for compiler in cxx_compiler c_compiler; do
   compiler_bin=${!compiler}
   compiler_bin_version=${compiler_bin}-${compiler_version_required}
-  if hash $compiler_bin_version 2>/dev/null; then eval "$compiler=$compiler_bin_version"; continue;fi
-  if hash $compiler_bin 2>/dev/null; then 
+  if hash $compiler_bin_version 2> /dev/null; then 
+    eval "$compiler=$compiler_bin_version"
+    continue
+  fi
+  if hash $compiler_bin 2>/dev/null; then
     compiler_version=`$compiler_bin -dumpversion|cut -d'.' -f1`
-    if [ $compiler_version -eq $compiler_version_required ];then continue; fi
+    if [ $compiler_version -eq $compiler_version_required ]; then 
+      continue
+    fi
   fi
   exit_error "$compiler_bin version 5 needs to be installed! "
 done
@@ -181,7 +187,7 @@ set_if_undef WORKBENCH_branch=master
 set_if_undef WORKBENCH_version=v1.2.2
 set_if_undef WORKBENCH_folder="$pipeline_build/workbench"
 set_if_undef WORKBENCH_build="$pipeline_build/workbench/build"
-set_if_undef WORKBENCH_cmake_flags="-DCMAKE_CXX_STANDARD=11 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF -DCMAKE_CXX_FLAGS=\"-std=c++11 -Wno-c++11-narrowing\" $WORKBENCH_folder/src"
+set_if_undef WORKBENCH_cmake_flags="-DCMAKE_CXX_STANDARD=11 -DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_CXX_EXTENSIONS=OFF $WORKBENCH_folder/src"
 
 set_if_undef ITK_install=1
 set_if_undef ITK_git=https://github.com/InsightSoftwareConsortium/ITK.git
@@ -230,7 +236,13 @@ for package in ${packages};do
     [ -d $package_folder ] || run git clone --recursive -b $package_branch $package_git $package_folder
     run cd $package_folder
     run git reset --hard $package_version
-    run git submodule update
+    run git submodule update --init
+
+    # MIRTK master does not link to the dhcp branch of DrawEM, which we need
+    # to get the neonatal-pipeline.sh script
+    if [ $package == "MIRTK" ]; then
+        ( cd Packages/DrawEM && git checkout dhcp )
+    fi
 
     run mkdir -p $package_build
     run cd $package_build

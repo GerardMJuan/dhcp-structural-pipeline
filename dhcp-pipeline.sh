@@ -3,6 +3,7 @@
 # if FSLDIR is not defined, assume we need to read the FSL startup
 if [ -z ${FSLDIR+x} ]; then
   if [ -f /etc/fsl/fsl.sh ]; then
+    echo running fsl.sh
     . /etc/fsl/fsl.sh
   else
     echo FSLDIR is not set and there is no system-wide FSL startup
@@ -173,6 +174,9 @@ runpipeline additional $scriptdir/misc/pipeline.sh $subj $roundedAge -d $workdir
 
 # surface extraction
 runpipeline surface $scriptdir/surface/pipeline.sh $subj -d $workdir -t $threads
+
+# align surfaces to 40w template
+runpipeline surface-to-template-alignment $scriptdir/surface_to_template_alignment/pipeline.sh $subj -d $workdir -t $threads
 
 # create data directory for subject
 runpipeline structure-data $scriptdir/misc/structure-data.sh $subjectID $sessionID $subj $roundedAge $datadir $workdir $minimal
