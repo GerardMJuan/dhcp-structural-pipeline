@@ -117,6 +117,15 @@ the branch you want to build, and enter:
 ```
 $ docker pull ubuntu:xenial
 $ docker build -t biomedia/dhcp-structural-pipeline:latest .
+```
+
+Log in to dockerhub and push the image. Note that the dockerhub ID is not your
+email address.
+
+```
+$ docker login
+Username: jcupitt
+Password: 
 $ docker push biomedia/dhcp-structural-pipeline:latest
 ```
 
