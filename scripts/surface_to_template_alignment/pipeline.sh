@@ -32,8 +32,6 @@ threads=1
 codedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 . $codedir/../../parameters/configuration.sh
 
-echo codedir = $codedir
-
 shift
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -63,8 +61,6 @@ fi
 subjectID=${BASH_REMATCH[1]}
 sessionID=${BASH_REMATCH[2]}
 
-echo $codedir
-
 # output dir for emma's script
 outdir=$datadir/workdir/$subj/surface_to_template_alignment
 
@@ -72,23 +68,27 @@ outdir=$datadir/workdir/$subj/surface_to_template_alignment
 age=40
 
 # appropriate andreas atlas
-templatevolume=andreas_v1/t2w/t$age.00.nii.gz
+templatevolume=$codedir/andreas_v1/t2w/t$age.00.nii.gz
 
 # emma surface templates ... sphere, anat and data
-templatesphere=new_surface_template/week$age.iter30.sphere.%hemi%.dedrift.AVERAGE_removedAffine.surf.gii 
-templateanat=new_surface_template/week$age.iter30.white.%hemi%.dedrift.AVERAGE_removedAffine.surf.gii
-templatedata=new_surface_template/week$age.iter30.sulc.%hemi%.AVERAGE.shape.gii 
+templatesphere=$codedir/new_surface_template/week$age.iter30.sphere.%hemi%.dedrift.AVERAGE_removedAffine.surf.gii 
+templateanat=$codedir/new_surface_template/week$age.iter30.white.%hemi%.dedrift.AVERAGE_removedAffine.surf.gii
+templatedata=$codedir/new_surface_template/week$age.iter30.sulc.%hemi%.AVERAGE.shape.gii 
 
-run align_to_template.sh \
-  $datadir/derivatives \
+# align_to_template.sh uses this to find related scripts
+export SURF2TEMPLATE=$codedir/..
+export WB_BIN=$codedir/../../build/workbench/build/CommandLine/wb_command
+export MIRTK_BIN=$codedir/../../build/MIRTK/build/bin/mirtk
+export MSM_BIN=$FSLDIR/bin/msm 
+
+run $codedir/align_to_template.sh \
+  $datadir \
   $subjectID \
   $sessionID \
   $templatevolume \
   $templatesphere \
   $templateanat \
   $templatedata \
-  rotational_transforms/week40_toFS_LR_rot.%hemi%.txt \
+  $codedir/rotational_transforms/week40_toFS_LR_rot.%hemi%.txt \
   $outdir \
-  configs/config_subject_to_40_week_template \
-  $FSLDIR/bin/msm \
-  $codedir/../../build/workbench/build/CommandLine/wb_command
+  $codedir/configs/config_subject_to_40_week_template 

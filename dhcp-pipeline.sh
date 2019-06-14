@@ -175,11 +175,11 @@ runpipeline additional $scriptdir/misc/pipeline.sh $subj $roundedAge -d $workdir
 # surface extraction
 runpipeline surface $scriptdir/surface/pipeline.sh $subj -d $workdir -t $threads
 
-# align surfaces to 40w template
-runpipeline surface-to-template-alignment $scriptdir/surface_to_template_alignment/pipeline.sh $subj -d $workdir -t $threads
-
 # create data directory for subject
 runpipeline structure-data $scriptdir/misc/structure-data.sh $subjectID $sessionID $subj $roundedAge $datadir $workdir $minimal
+
+# align surfaces to 40w template
+runpipeline surface-to-template-alignment $scriptdir/surface_to_template_alignment/pipeline.sh $subj -d $workdir -t $threads
 
 # clean-up
 if [ $cleanup -eq 1 ];then

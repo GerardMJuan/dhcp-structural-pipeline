@@ -18,12 +18,13 @@ Usage() {
     echo " pre_rotation : txt file containing rotational transform between MNI and FS_LR space (i.e. file rotational_transforms/week40_toFS_LR_rot.%hemi%.txt  ) "
     echo " outdir : base directory where output will be sent "
     echo " config : base config file "
-    echo " MSM bin: msm binary"
-    echo " wb bin : workbench binary"
     echo "output: 1) surface registrations; 2)  native giftis resampled with template topology "
+    echo ""
+    echo "set SURF2TEMPLATE, WB_BIN, MSM_BIN, MIRTK_BIN to this parent dir, "
+    echo "the workbench executable, the MSM executable and the MIRTK exe"
 }
 
-if [ "$#" -lt 11  ]; then
+if [ "$#" -lt 9  ]; then
 echo "$#" 
    Usage
    exit
@@ -39,25 +40,20 @@ templatedata=$1;shift
 pre_rotation=$1;shift
 outdir=$1; shift
 config=$1; shift
-MSMBIN=$1; shift
-WB_BIN=$1; shift
 
 mkdir -p $outdir $outdir/volume_dofs $outdir/surface_transforms
 
 # define paths to variables
 
-native_volume=${topdir}/sub-${subjid}/ses-$session/anat/sub-${subjid}_ses-${session}_T2w_restore_brain.nii.gz 
+native_volume=${topdir}/sub-${subjid}/ses-${session}/anat/sub-${subjid}_ses-${session}_T2w_restore_brain.nii.gz
 
 # native spheres
 native_sphereL=${topdir}/sub-${subjid}/ses-$session/anat/Native/sub-${subjid}_ses-${session}_left_sphere.surf.gii
 native_sphereR=${topdir}/sub-${subjid}/ses-$session/anat/Native/sub-${subjid}_ses-${session}_right_sphere.surf.gii
 
-echo native spheres $native_sphere_L $native_sphere_R
-
 # native spheres rotated into FS_LR space
 native_rot_sphereL=${topdir}/sub-${subjid}/ses-$session/anat/Native/sub-${subjid}_ses-${session}_left_sphere.rot.surf.gii
 native_rot_sphereR=${topdir}/sub-${subjid}/ses-$session/anat/Native/sub-${subjid}_ses-${session}_right_sphere.rot.surf.gii
-
 
 # native data
 native_dataL=${topdir}/sub-${subjid}/ses-$session/anat/Native/sub-${subjid}_ses-${session}_left_sulc.shape.gii
@@ -70,7 +66,7 @@ pre_rotationR=$(echo ${pre_rotation} |  sed "s/%hemi%/R/g")
 
 # rotate left and right hemispheres into approximate alignment with MNI space
 echo ${SURF2TEMPLATE}/surface_to_template_alignment/pre_rotation.sh $native_volume $native_sphereL $templatevolume $pre_rotationL $outdir/volume_dofs/${subjid}-${session}.dof ${native_rot_sphereL}
-${SURF2TEMPLATE}/surface_to_template_alignment/pre_rotation.sh $native_volume $native_sphereL $templatevolume $pre_rotationL $outdir/volume_dofs/${subjid}-${session}.dof ${native_rot_sphereL}
+${SURF2TEMPLATE}/surface_to_template_alignment/pre_rotation.sh $native_volume $native_sphereL $templatevolume $pre_rotationL $outdir/volume_dofs/${subjid}-${session}.dof ${native_rot_sphereL} 
 ${SURF2TEMPLATE}/surface_to_template_alignment/pre_rotation.sh $native_volume $native_sphereR $templatevolume $pre_rotationR $outdir/volume_dofs/${subjid}-${session}.dof ${native_rot_sphereR}
 
 
@@ -93,8 +89,8 @@ for hemi in L R; do
     fi
 
     if [ ! -f ${outname}sphere.reg.surf.gii ]; then
-	echo  ${MSMBIN}  --conf=${config}  --inmesh=${inmesh}  --refmesh=${refmesh} --indata=${indata} --refdata=${refdata} --out=${outname} --verbose
-	 ${MSMBIN}  --conf=${config}  --inmesh=${inmesh}  --refmesh=${refmesh} --indata=${indata} --refdata=${refdata} --out=${outname} --verbose
+	echo  ${MSM_BIN}  --conf=${config}  --inmesh=${inmesh}  --refmesh=${refmesh} --indata=${indata} --refdata=${refdata} --out=${outname} --verbose
+	 ${MSM_BIN}  --conf=${config}  --inmesh=${inmesh}  --refmesh=${refmesh} --indata=${indata} --refdata=${refdata} --out=${outname} --verbose
     fi
 
     cp ${outname}sphere.reg.surf.gii ${topdir}/sub-${subjid}/ses-$session/anat/Native/
