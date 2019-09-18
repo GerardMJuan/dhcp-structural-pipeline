@@ -25,7 +25,7 @@ Usage() {
 }
 
 if [ "$#" -lt 9  ]; then
-echo "$#" 
+   echo "$#" 
    Usage
    exit
 fi
@@ -73,27 +73,26 @@ ${SURF2TEMPLATE}/surface_to_template_alignment/pre_rotation.sh $native_volume $n
 # run msm non linear alignment to template for left and right hemispheres
 
 for hemi in L R; do
-    
-    refmesh=$(echo $templatesphere | sed "s/%hemi%/$hemi/g")
-    refdata=$(echo $templatedata | sed "s/%hemi%/$hemi/g")
+  refmesh=$(echo $templatesphere | sed "s/%hemi%/$hemi/g")
+  refdata=$(echo $templatedata | sed "s/%hemi%/$hemi/g")
 
-    if [ "$hemi" == "L" ]; then
-       inmesh=$native_rot_sphereL
-       indata=$native_dataL
-       outname=$outdir/surface_transforms/sub-${subjid}_ses-${session}_left_
+  if [ "$hemi" == "L" ]; then
+    inmesh=$native_rot_sphereL
+    indata=$native_dataL
+    outname=$outdir/surface_transforms/sub-${subjid}_ses-${session}_left_
 
-    else
-       inmesh=$native_rot_sphereR
-       indata=$native_dataR
-       outname=$outdir/surface_transforms/sub-${subjid}_ses-${session}_right_
-    fi
+  else
+    inmesh=$native_rot_sphereR
+    indata=$native_dataR
+    outname=$outdir/surface_transforms/sub-${subjid}_ses-${session}_right_
+  fi
 
-    if [ ! -f ${outname}sphere.reg.surf.gii ]; then
-	echo  ${MSM_BIN}  --conf=${config}  --inmesh=${inmesh}  --refmesh=${refmesh} --indata=${indata} --refdata=${refdata} --out=${outname} --verbose
-	 ${MSM_BIN}  --conf=${config}  --inmesh=${inmesh}  --refmesh=${refmesh} --indata=${indata} --refdata=${refdata} --out=${outname} --verbose
-    fi
+  if [ ! -f ${outname}sphere.reg.surf.gii ]; then
+	  echo  ${MSM_BIN}  --conf=${config}  --inmesh=${inmesh}  --refmesh=${refmesh} --indata=${indata} --refdata=${refdata} --out=${outname} --verbose
+	  ${MSM_BIN}  --conf=${config}  --inmesh=${inmesh}  --refmesh=${refmesh} --indata=${indata} --refdata=${refdata} --out=${outname} --verbose
+  fi
 
-    cp ${outname}sphere.reg.surf.gii ${topdir}/sub-${subjid}/ses-$session/anat/Native/
+  cp ${outname}sphere.reg.surf.gii ${topdir}/sub-${subjid}/ses-$session/anat/Native/
     
 done
 

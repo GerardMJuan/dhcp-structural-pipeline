@@ -251,13 +251,57 @@ for package in ${packages};do
     
 done
 
+# MSM is a little awkward to build ... it must have g++-4.8, since it links
+# directly to FSL
+
+# the struct-pipeline-build branch has a fix to the final MSM makefile
+
+run cd /usr/local/src 
+run . /etc/fsl/fsl.sh 
+run export FSLDEVDIR=$FSLDIR 
+run git clone https://github.com/jcupitt/MSM_HOCR.git 
+run cd MSM_HOCR 
+run git checkout struct-pipeline-build 
+run cp -r extras/ELC1.04/ELC $FSLDEVDIR/extras/include/ELC 
+run cp -r $FSLDIR/src/FastPDlib $FSLDEVDIR/extras/src 
+
+# switch the default compiler to 4.8 to match the fsl binary
+run update-alternatives --set gcc /usr/bin/gcc-4.8 
+run update-alternatives --set g++ /usr/bin/g++-4.8 
+
+run cd /usr/local/src 
+run . /etc/fsl/fsl.sh 
+run export FSLDEVDIR=$FSLDIR 
+run cd MSM_HOCR 
+run cd src/newmesh 
+run make  
+run make install 
+run cd ../DiscreteOpt 
+run make  
+run make install 
+run cd $FSLDEVDIR/extras/src/FastPDlib/ 
+run make 
+run make install 
+run cd /usr/local/src/MSM_HOCR/src/MSMRegLib/ 
+run make 
+run make install 
+run cd ../MSM 
+run make 
+run make install 
+
+# replace the FSL6 msm with the one we built
+run cp msm /usr/local/fsl/bin
+
+# flip the compiler back again
+run update-alternatives --set gcc /usr/bin/gcc-5 
+run update-alternatives --set g++ /usr/bin/g++-5 
+
 echo_green "Installing pipeline"
 cmake_flags=`eval echo $cmake_flags`
 run mkdir -p $pipelinebinaries_build
 run cd $pipelinebinaries_build
 run cmake $code_dir $cmake_flags $cxx_flags
 run make -j$num_cores
-
 
 
 if [ ! -d $code_dir/atlases ];then 
