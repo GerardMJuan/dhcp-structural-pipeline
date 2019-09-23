@@ -45,19 +45,22 @@ mkdir -p $outdir $outdir/volume_dofs $outdir/surface_transforms
 
 # define paths to variables
 
-native_volume=${topdir}/sub-${subjid}/ses-${session}/anat/sub-${subjid}_ses-${session}_T2w_restore_brain.nii.gz
+# read generated files from here
+anat=${topdir}/derivatives/sub-${subjid}/ses-${session}/anat
+
+native_volume=${anat}/sub-${subjid}_ses-${session}_T2w_restore_brain.nii.gz
 
 # native spheres
-native_sphereL=${topdir}/sub-${subjid}/ses-$session/anat/Native/sub-${subjid}_ses-${session}_left_sphere.surf.gii
-native_sphereR=${topdir}/sub-${subjid}/ses-$session/anat/Native/sub-${subjid}_ses-${session}_right_sphere.surf.gii
+native_sphereL=${anat}/Native/sub-${subjid}_ses-${session}_left_sphere.surf.gii
+native_sphereR=${anat}/Native/sub-${subjid}_ses-${session}_right_sphere.surf.gii
 
 # native spheres rotated into FS_LR space
-native_rot_sphereL=${topdir}/sub-${subjid}/ses-$session/anat/Native/sub-${subjid}_ses-${session}_left_sphere.rot.surf.gii
-native_rot_sphereR=${topdir}/sub-${subjid}/ses-$session/anat/Native/sub-${subjid}_ses-${session}_right_sphere.rot.surf.gii
+native_rot_sphereL=${anat}/Native/sub-${subjid}_ses-${session}_left_sphere.rot.surf.gii
+native_rot_sphereR=${anat}/Native/sub-${subjid}_ses-${session}_right_sphere.rot.surf.gii
 
 # native data
-native_dataL=${topdir}/sub-${subjid}/ses-$session/anat/Native/sub-${subjid}_ses-${session}_left_sulc.shape.gii
-native_dataR=${topdir}/sub-${subjid}/ses-$session/anat/Native/sub-${subjid}_ses-${session}_right_sulc.shape.gii
+native_dataL=${anat}/Native/sub-${subjid}_ses-${session}_left_sulc.shape.gii
+native_dataR=${anat}/Native/sub-${subjid}_ses-${session}_right_sulc.shape.gii
 
 # pre-rotations
 pre_rotationL=$(echo ${pre_rotation} |  sed "s/%hemi%/L/g")
@@ -92,16 +95,17 @@ for hemi in L R; do
 	  ${MSM_BIN}  --conf=${config}  --inmesh=${inmesh}  --refmesh=${refmesh} --indata=${indata} --refdata=${refdata} --out=${outname} --verbose
   fi
 
-  cp ${outname}sphere.reg.surf.gii ${topdir}/sub-${subjid}/ses-$session/anat/Native/
+  cp ${outname}sphere.reg.surf.gii ${anat}/Native/
     
 done
 
-# now resample template topology on native surfaces - output in fsaverage_LR32k directory
+# now resample template topology on native surfaces - output in 
+# fsaverage_LR32k directory
 
-mkdir -p ${topdir}/sub-${subjid}/ses-$session/anat/fsaverage_LR32k
+mkdir -p ${anat}/fsaverage_LR32k
 
-nativedir=${topdir}/sub-${subjid}/ses-$session/anat/Native
-fs_LRdir=${topdir}/sub-${subjid}/ses-$session/anat/fsaverage_LR32k
+nativedir=${anat}/Native
+fs_LRdir=${anat}/fsaverage_LR32k
 
 for hemi in left right; do
     transformed_sphere=$outdir/surface_transforms/sub-${subjid}_ses-${session}_${hemi}_sphere.reg.surf.gii

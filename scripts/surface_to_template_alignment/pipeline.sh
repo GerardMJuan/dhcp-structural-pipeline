@@ -54,14 +54,14 @@ $BASH_SOURCE $command
 
 ################ PIPELINE ################
 
-if ! [[ $subj =~ (CC[0-9]*XX[0-9]*)-([0-9]*) ]]; then
+if ! [[ $subj =~ (.*)-(.*) ]]; then
   echo "bad subject-session $subj"
   exit 1
 fi
 subjectID=${BASH_REMATCH[1]}
 sessionID=${BASH_REMATCH[2]}
 
-# output dir for emma's script
+# workdir for emma's script
 outdir=$datadir/workdir/$subj/surface_to_template_alignment
 
 # we align to the 40w template

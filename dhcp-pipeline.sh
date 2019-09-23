@@ -139,9 +139,10 @@ echo "
 $BASH_SOURCE $command
 ----------------------------"
 
-last_file=$datadir/derivatives/sub-$subjectID/ses-$sessionID/anat/Native/sub-${subjectID}_ses-${sessionID}_wb.spec
-if [ -f $last_file ];then echo "dHCP pipeline already completed!";exit; fi
-
+if [ -f $datadir/derivatives/sub-$subjectID/ses-$sessionID/complete ]; then
+  echo "dHCP pipeline already completed!"
+  exit
+fi
 
 # infodir=$datadir/info 
 logdir=$datadir/logs
@@ -175,15 +176,19 @@ runpipeline additional $scriptdir/misc/pipeline.sh $subj $roundedAge -d $workdir
 # surface extraction
 runpipeline surface $scriptdir/surface/pipeline.sh $subj -d $workdir -t $threads
 
-# create data directory for subject
+# copy generated files to output
 runpipeline structure-data $scriptdir/misc/structure-data.sh $subjectID $sessionID $subj $roundedAge $datadir $workdir $minimal
 
 # align surfaces to 40w template
-runpipeline surface-to-template-alignment $scriptdir/surface_to_template_alignment/pipeline.sh $subj -d $workdir -t $threads
+# this has to run after the copy to output, since it needs some files which
+# are only generated during that final copy
+runpipeline surface-to-template-alignment $scriptdir/surface_to_template_alignment/pipeline.sh $subj -d $datadir -t $threads
 
 # clean-up
 if [ $cleanup -eq 1 ];then
   runpipeline cleanup rm -r $workdir
 fi
 
+# signal successful completion
+touch $datadir/derivatives/sub-$subjectID/ses-$sessionID/complete
 echo "dHCP pipeline completed!"
