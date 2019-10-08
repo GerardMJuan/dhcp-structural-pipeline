@@ -100,42 +100,72 @@ for hemi in L R; do
 done
 
 # now resample template topology on native surfaces - output in 
-# fsaverage_LR32k directory
+# anat directory, but we tag as "space-dHCPavg32k"
 
 mkdir -p ${anat}/fsaverage_LR32k
 
 nativedir=${anat}/Native
-fs_LRdir=${anat}/fsaverage_LR32k
+space32k=dHCPavg32k
 
-for hemi in left right; do
-    transformed_sphere=$outdir/surface_transforms/sub-${subjid}_ses-${session}_${hemi}_sphere.reg.surf.gii
-    
-    if [ "$hemi" == "left" ]; then
-	template=$(echo $templatesphere | sed "s/%hemi%/L/g")
-	template_areal=$(echo $templateanat | sed "s/%hemi%/L/g")
-    else
-        template=$(echo $templatesphere | sed "s/%hemi%/R/g")
-	template_areal=$(echo $templateanat | sed "s/%hemi%/R/g")
-    fi
+for in_hemi in left right; do
+  # BIDS uses L and R
+  if [ $in_hemi == "left" ]; then
+    out_hemi=L
+  else
+    out_hemi=R
+  fi
 
-    # resample surfaces
-    for surf in pial white midthickness sphere inflated very_inflated; do	
-	${WB_BIN} -surface-resample $nativedir/sub-${subjid}_ses-${session}_${hemi}_${surf}.surf.gii $transformed_sphere $template ADAP_BARY_AREA $fs_LRdir/sub-${subjid}_ses-${session}_${hemi}_${surf}.32k_fs_LR.surf.gii -area-surfs $nativedir/sub-${subjid}_ses-${session}_${hemi}_white.surf.gii  $template_areal
-     done
-		
-     # resample .func metrics
-		
-    for metric in myelin_map smoothed_myelin_map ; do
-	${WB_BIN} -metric-resample $nativedir/sub-${subjid}_ses-${session}_${hemi}_${metric}.func.gii $transformed_sphere $template ADAP_BARY_AREA $fs_LRdir/sub-${subjid}_ses-${session}_${hemi}_${metric}.32k_fs_LR.func.gii -area-surfs $nativedir/sub-${subjid}_ses-${session}_${hemi}_white.surf.gii  $template_areal
-    done
-    
-    # resample .shape metrics
-    for metric in sulc curvature thickness corr_thickness ; do
-	${WB_BIN} -metric-resample $nativedir/sub-${subjid}_ses-${session}_${hemi}_${metric}.shape.gii $transformed_sphere $template ADAP_BARY_AREA $fs_LRdir/sub-${subjid}_ses-${session}_${hemi}_${metric}.32k_fs_LR.shape.gii -area-surfs $nativedir/sub-${subjid}_ses-${session}_${hemi}_white.surf.gii  $template_areal
-    done
+  transformed_sphere=$outdir/surface_transforms/sub-${subjid}_ses-${session}_${in_hemi}_sphere.reg.surf.gii
 
-    ${WB_BIN} -label-resample $nativedir/sub-${subjid}_ses-${session}_${hemi}_drawem.label.gii $transformed_sphere $template ADAP_BARY_AREA $fs_LRdir/sub-${subjid}_ses-${session}_${hemi}_drawem.label.gii -area-surfs $nativedir/sub-${subjid}_ses-${session}_${hemi}_white.surf.gii  $template_areal
+  template=$(echo $templatesphere | sed "s/%hemi%/$out_hemi/g")
+  template_areal=$(echo $templateanat | sed "s/%hemi%/$out_hemi/g")
+
+  # resample surfaces
+  for surf in pial white midthickness sphere inflated very_inflated; do	
+    ${WB_BIN} -surface-resample \
+      $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_${surf}.surf.gii \
+      $transformed_sphere \
+      $template \
+      ADAP_BARY_AREA \
+      $anat/sub-${subjid}_ses-${session}_hemi-${out_hemi}_space-${space32k}_${surf}.surf.gii \
+      -area-surfs \
+        $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_white.surf.gii \
+        $template_areal
+  done
+  
+  # resample .func metrics
+  for metric in myelin_map smoothed_myelin_map ; do
+    ${WB_BIN} -metric-resample \
+      $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_${metric}.func.gii \
+      $transformed_sphere \
+      $template \
+      ADAP_BARY_AREA \
+      $anat/sub-${subjid}_ses-${session}_hemi-${out_hemi}_space-${space32k}_${metric}.func.gii \
+      -area-surfs \
+        $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_white.surf.gii \
+        $template_areal
+  done
+  
+  # resample .shape metrics
+  for metric in sulc curvature thickness corr_thickness ; do
+    ${WB_BIN} -metric-resample \
+      $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_${metric}.shape.gii \
+      $transformed_sphere \
+      $template \
+      ADAP_BARY_AREA \
+      $anat/sub-${subjid}_ses-${session}_hemi-${out_hemi}_space-${space32k}_${metric}.shape.gii \
+      -area-surfs \
+        $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_white.surf.gii \
+        $template_areal
+  done
+
+  ${WB_BIN} -label-resample \
+    $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_drawem.label.gii \
+    $transformed_sphere \
+    $template \
+    ADAP_BARY_AREA \
+    $fs_LRdir/sub-${subjid}_ses-${session}_hemi-${out_hemi}_drawem.label.gii \
+    -area-surfs \
+      $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_white.surf.gii \
+      $template_areal
 done
-		    
-
-
