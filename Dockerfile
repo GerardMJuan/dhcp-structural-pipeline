@@ -39,7 +39,7 @@ ENV fsl_prefix=/usr/local/fsl
 # /etc/fsl/fsl.sh 
 COPY . /usr/src/structural-pipeline
 RUN cd /usr/src/structural-pipeline \
-    && python fslinstaller.py -V 6.0.1 -q -d $fsl_prefix \
+    && python fslinstaller.py -V 6.0.2 -q -d $fsl_prefix \
     && mkdir -p /etc/fsl \
     && echo "FSLDIR=$fsl_prefix; . \${FSLDIR}/etc/fslconf/fsl.sh; PATH=\${FSLDIR}/bin:\${PATH}; export FSLDIR PATH" > /etc/fsl/fsl.sh 
 
