@@ -102,8 +102,6 @@ done
 # now resample template topology on native surfaces - output in 
 # anat directory, but we tag as "space-dHCPavg32k"
 
-mkdir -p ${anat}/fsaverage_LR32k
-
 nativedir=${anat}/Native
 space32k=dHCPavg32k
 
@@ -122,32 +120,48 @@ for in_hemi in left right; do
 
   # resample surfaces
   for surf in pial white midthickness sphere inflated very_inflated; do	
+    # no underscores in BIDS names
+    if [ $surf == "very_inflated" ]; then
+      new_surf="veryinflated"
+    else
+      new_surf=$surf
+    fi
+
     ${WB_BIN} -surface-resample \
       $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_${surf}.surf.gii \
       $transformed_sphere \
       $template \
       ADAP_BARY_AREA \
-      $anat/sub-${subjid}_ses-${session}_hemi-${out_hemi}_space-${space32k}_${surf}.surf.gii \
+      $anat/sub-${subjid}_ses-${session}_hemi-${out_hemi}_space-${space32k}_${new_surf}.surf.gii \
       -area-surfs \
         $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_white.surf.gii \
         $template_areal
   done
-  
-  # resample .func metrics
-  for metric in myelin_map smoothed_myelin_map ; do
-    ${WB_BIN} -metric-resample \
-      $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_${metric}.func.gii \
-      $transformed_sphere \
-      $template \
-      ADAP_BARY_AREA \
-      $anat/sub-${subjid}_ses-${session}_hemi-${out_hemi}_space-${space32k}_${metric}.func.gii \
-      -area-surfs \
-        $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_white.surf.gii \
-        $template_areal
-  done
-  
+
+  # resample .func metrics ... again, no underscores in BIDS names, so we must
+  # rename myelin_map and smoothed_myelin_map
+  ${WB_BIN} -metric-resample \
+    $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_myelin_map.func.gii \
+    $transformed_sphere \
+    $template \
+    ADAP_BARY_AREA \
+    $anat/sub-${subjid}_ses-${session}_hemi-${out_hemi}_space-${space32k}_myelinmap.func.gii \
+    -area-surfs \
+      $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_white.surf.gii \
+      $template_areal
+
+  ${WB_BIN} -metric-resample \
+    $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_smoothed_myelin_map.func.gii \
+    $transformed_sphere \
+    $template \
+    ADAP_BARY_AREA \
+    $anat/sub-${subjid}_ses-${session}_hemi-${out_hemi}_desc-smoothed_space-${space32k}_myelinmap.func.gii \
+    -area-surfs \
+      $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_white.surf.gii \
+      $template_areal
+
   # resample .shape metrics
-  for metric in sulc curvature thickness corr_thickness ; do
+  for metric in sulc curvature thickness; do
     ${WB_BIN} -metric-resample \
       $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_${metric}.shape.gii \
       $transformed_sphere \
@@ -159,12 +173,23 @@ for in_hemi in left right; do
         $template_areal
   done
 
+  # again, no _ in BIDS names
+  ${WB_BIN} -metric-resample \
+    $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_corr_thickness.shape.gii \
+    $transformed_sphere \
+    $template \
+    ADAP_BARY_AREA \
+    $anat/sub-${subjid}_ses-${session}_hemi-${out_hemi}_desc-corr_space-${space32k}_thickness.shape.gii \
+    -area-surfs \
+      $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_white.surf.gii \
+      $template_areal
+
   ${WB_BIN} -label-resample \
     $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_drawem.label.gii \
     $transformed_sphere \
     $template \
     ADAP_BARY_AREA \
-    $fs_LRdir/sub-${subjid}_ses-${session}_hemi-${out_hemi}_drawem.label.gii \
+    $anat/sub-${subjid}_ses-${session}_hemi-${out_hemi}_drawem.label.gii \
     -area-surfs \
       $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_white.surf.gii \
       $template_areal
