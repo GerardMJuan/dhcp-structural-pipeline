@@ -95,8 +95,6 @@ for hemi in L R; do
 	  ${MSM_BIN}  --conf=${config}  --inmesh=${inmesh}  --refmesh=${refmesh} --indata=${indata} --refdata=${refdata} --out=${outname} --verbose
   fi
 
-  cp ${outname}sphere.reg.surf.gii ${anat}/Native/
-    
 done
 
 # now resample template topology on native surfaces - output in 
@@ -117,6 +115,10 @@ for in_hemi in left right; do
 
   template=$(echo $templatesphere | sed "s/%hemi%/$out_hemi/g")
   template_areal=$(echo $templateanat | sed "s/%hemi%/$out_hemi/g")
+
+  # template sphere needed for HCP compat ... this is the same for all
+  # subjects, so it goes higher up in the tree
+  cp $template ${topdir}/derivatives/hemi-${out_hemi}_space-template40w_sphere.surf.gii
 
   # resample surfaces
   for surf in pial white midthickness sphere inflated very_inflated; do	

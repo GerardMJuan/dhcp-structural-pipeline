@@ -119,12 +119,11 @@ $ docker pull ubuntu:xenial
 $ docker build -t biomedia/dhcp-structural-pipeline:latest .
 ```
 
-Log in to dockerhub and push the image. Note that the dockerhub ID is not your
-email address.
+Login to dockerhub and push the image. The password is a special access token
+for 2fa.
 
 ```
-$ docker login
-Username: jcupitt
+$ docker login --username jcupitt
 Password: 
 $ docker push biomedia/dhcp-structural-pipeline:latest
 ```
