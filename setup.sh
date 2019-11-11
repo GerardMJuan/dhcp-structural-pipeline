@@ -207,15 +207,17 @@ set_if_undef VTK_build="$pipeline_build/VTK/build"
 set_if_undef MIRTK_install=1
 set_if_undef MIRTK_git=https://github.com/BioMedIA/MIRTK.git
 set_if_undef MIRTK_branch=master
-set_if_undef MIRTK_version=e2a22767f55028fe1d64fa70eb3afe9649048f48
+set_if_undef MIRTK_version=
 set_if_undef MIRTK_folder="$pipeline_build/MIRTK"
 set_if_undef MIRTK_build="$pipeline_build/MIRTK/build"
 set_if_undef MIRTK_cmake_flags="-DMODULE_Deformable=ON -DMODULE_DrawEM=ON -DDEPENDS_Eigen3_DIR=$code_dir/ThirdParty/eigen-eigen-67e894c6cd8f -DWITH_VTK=ON -DDEPENDS_VTK_DIR=$VTK_build -DWITH_TBB=ON"
 
+# some small tweaks to help build in my branch of SM
+# - build with c++14
+# - better MIRTK lib detection
 set_if_undef SPHERICALMESH_install=1
-set_if_undef SPHERICALMESH_git=https://github.com/amakropoulos/SphericalMesh.git
-# there's no master for SM, 1.1 is the latest
-set_if_undef SPHERICALMESH_branch=dhcp-v1.1
+set_if_undef SPHERICALMESH_git=https://github.com/jcupitt/SphericalMesh.git
+set_if_undef SPHERICALMESH_branch=master
 set_if_undef SPHERICALMESH_version=
 set_if_undef SPHERICALMESH_folder="$pipeline_build/SphericalMesh"
 set_if_undef SPHERICALMESH_build="$pipeline_build/SphericalMesh/build"
