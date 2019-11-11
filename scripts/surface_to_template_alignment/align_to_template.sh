@@ -120,6 +120,9 @@ for in_hemi in left right; do
   # subjects, so it goes higher up in the tree
   cp $template ${topdir}/derivatives/hemi-${out_hemi}_space-template40w_sphere.surf.gii
 
+  # native transformed to template
+  cp $transformed_sphere $anat/sub-${subjid}_ses-${session}_hemi-${out_hemi}_space-template40w_sphere.surf.gii 
+  
   # resample surfaces
   for surf in pial white midthickness sphere inflated very_inflated; do	
     # no underscores in BIDS names
@@ -187,11 +190,11 @@ for in_hemi in left right; do
       $template_areal
 
   ${WB_BIN} -label-resample \
-    $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_drawem.label.gii \
+    $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_space-${space32k}_drawem.label.gii \
     $transformed_sphere \
     $template \
     ADAP_BARY_AREA \
-    $anat/sub-${subjid}_ses-${session}_hemi-${out_hemi}_drawem.label.gii \
+    $anat/sub-${subjid}_ses-${session}_hemi-${out_hemi}_space-${space32k}_drawem.label.gii \
     -area-surfs \
       $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_white.surf.gii \
       $template_areal
