@@ -111,20 +111,22 @@ for in_hemi in left right; do
     out_hemi=R
   fi
 
+  # first copy the template sphere to the subjects fsaverage_LR32k
+  # Each subject's template space sphere IS the template! following HCP form.
+  # the templatesphere uses L and R as well
+  refmesh=$(echo $templatesphere | sed "s/%hemi%/$out_hemi/g")
+  cp $refmesh ${anat}/sub-${subjid}_ses-${session}_hemi-${out_hemi}_space-${space32k}_sphere.surf.gii
+  
   transformed_sphere=$outdir/surface_transforms/sub-${subjid}_ses-${session}_${in_hemi}_sphere.reg.surf.gii
 
   template=$(echo $templatesphere | sed "s/%hemi%/$out_hemi/g")
   template_areal=$(echo $templateanat | sed "s/%hemi%/$out_hemi/g")
 
-  # template sphere needed for HCP compat ... this is the same for all
-  # subjects, so it goes higher up in the tree
-  cp $template ${topdir}/derivatives/hemi-${out_hemi}_space-template40w_sphere.surf.gii
-
   # native transformed to template
-  cp $transformed_sphere $anat/sub-${subjid}_ses-${session}_hemi-${out_hemi}_space-template40w_sphere.surf.gii 
+  cp $transformed_sphere $anat/sub-${subjid}_ses-${session}_hemi-${out_hemi}_sphere.reg.surf.gii 
   
   # resample surfaces
-  for surf in pial white midthickness sphere inflated very_inflated; do	
+  for surf in pial white midthickness inflated very_inflated; do	
     # no underscores in BIDS names
     if [ $surf == "very_inflated" ]; then
       new_surf="veryinflated"
@@ -190,7 +192,7 @@ for in_hemi in left right; do
       $template_areal
 
   ${WB_BIN} -label-resample \
-    $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_space-${space32k}_drawem.label.gii \
+    $nativedir/sub-${subjid}_ses-${session}_${in_hemi}_drawem.label.gii \
     $transformed_sphere \
     $template \
     ADAP_BARY_AREA \
