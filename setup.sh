@@ -210,7 +210,7 @@ set_if_undef MIRTK_branch=master
 set_if_undef MIRTK_version=
 set_if_undef MIRTK_folder="$pipeline_build/MIRTK"
 set_if_undef MIRTK_build="$pipeline_build/MIRTK/build"
-set_if_undef MIRTK_cmake_flags="-DMODULE_Deformable=ON -DMODULE_DrawEM=ON -DDEPENDS_Eigen3_DIR=$code_dir/ThirdParty/eigen-eigen-67e894c6cd8f -DWITH_VTK=ON -DDEPENDS_VTK_DIR=$VTK_build -DWITH_TBB=ON"
+set_if_undef MIRTK_cmake_flags="-DMODULE_Deformable=ON -DMODULE_DrawEM=ON -DDEPENDS_Eigen3_DIR=$code_dir/ThirdParty/eigen-eigen-67e894c6cd8f -DWITH_VTK=ON -DDEPENDS_VTK_DIR=$VTK_build -DWITH_TBB=ON -DITK_DIR=$ITK_build"
 
 # some small tweaks to help build in my branch of SM
 # - build with c++14
@@ -240,10 +240,12 @@ for package in ${packages};do
     run git reset --hard $package_version
     run git submodule update --init
 
-    # MIRTK master does not link to the dhcp branch of DrawEM, which we need
-    # to get the neonatal-pipeline.sh script
+    # aee8fba is the version used in the first and second data releases
+    # v1.2.1 has all the latest stuff, but segmentations look different
+    # scripts/segmentation/pipeline.sh knows how to run the two versions
     if [ $package == "MIRTK" ]; then
-        ( cd Packages/DrawEM && git checkout dhcp )
+        # ( cd Packages/DrawEM && git checkout aee8fba )
+        ( cd Packages/DrawEM && git checkout v1.2.1 )
     fi
 
     run mkdir -p $package_build
