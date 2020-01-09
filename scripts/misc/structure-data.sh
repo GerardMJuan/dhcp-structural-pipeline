@@ -70,12 +70,12 @@ for m in ${ms};do
 done
 
 # masks
-run $action masks/$subj.nii.gz $outputDerivedDir/${prefix}_brainmask_drawem.nii.gz
-run $action masks/$subj-bet.nii.gz $outputDerivedDir/${prefix}_brainmask_bet.nii.gz
+run mirtk convert-image masks/$subj.nii.gz $outputDerivedDir/${prefix}_brainmask_drawem.nii.gz -uchar
+run mirtk convert-image masks/$subj-bet.nii.gz $outputDerivedDir/${prefix}_brainmask_bet.nii.gz -uchar
 
 # segmentations
 for seg in all_labels tissue_labels;do
-    run $action segmentations/${subj}_${seg}.nii.gz $outputDerivedDir/${prefix}_drawem_${seg}.nii.gz
+    run mirtk convert-image segmentations/${subj}_${seg}.nii.gz $outputDerivedDir/${prefix}_drawem_${seg}.nii.gz -uchar
 done
 
 # warps
@@ -109,7 +109,7 @@ if [ -f T1/$subj.nii.gz ];then
   wbvols="$wbvols T1w_restore T1wdividedbyT2w T1wdividedbyT2w_ribbon"
   wbmetrics="$wbmetrics myelin_map smoothed_myelin_map"
   # myelin images etc.
-  run $action $surfdir/$subj.ribbon.nii.gz $outputDerivedDir/${prefix}_ribbon.nii.gz
+  run mirtk convert-image $surfdir/$subj.ribbon.nii.gz $outputDerivedDir/${prefix}_ribbon.nii.gz -uchar
   run $action $surfdir/$subj.T1wDividedByT2w_defaced.nii.gz $outputDerivedDir/${prefix}_T1wdividedbyT2w.nii.gz
   run $action $surfdir/$subj.T1wDividedByT2w_ribbon.nii.gz $outputDerivedDir/${prefix}_T1wdividedbyT2w_ribbon.nii.gz
 fi
