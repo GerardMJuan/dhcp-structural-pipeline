@@ -205,8 +205,10 @@ set_if_undef VTK_folder="$pipeline_build/VTK"
 set_if_undef VTK_build="$pipeline_build/VTK/build"
 
 set_if_undef MIRTK_install=1
-set_if_undef MIRTK_git=https://github.com/BioMedIA/MIRTK.git
-set_if_undef MIRTK_branch=master
+# switch to my branch for testing
+# set_if_undef MIRTK_git=https://github.com/BioMedIA/MIRTK.git
+set_if_undef MIRTK_git=https://github.com/jcupitt/MIRTK.git
+set_if_undef MIRTK_branch=revise-registration-cfg
 set_if_undef MIRTK_version=
 set_if_undef MIRTK_folder="$pipeline_build/MIRTK"
 set_if_undef MIRTK_build="$pipeline_build/MIRTK/build"
@@ -243,10 +245,10 @@ for package in ${packages};do
     # aee8fba is the version used in the first and second data releases
     # v1.2.1 has all the latest stuff, but segmentations look different
     # scripts/segmentation/pipeline.sh knows how to run the two versions
-    if [ $package == "MIRTK" ]; then
-        # ( cd Packages/DrawEM && git checkout aee8fba )
-        ( cd Packages/DrawEM && git checkout v1.2.1 )
-    fi
+#     if [ $package == "MIRTK" ]; then
+#         # ( cd Packages/DrawEM && git checkout aee8fba )
+#         ( cd Packages/DrawEM && git checkout v1.2.1 )
+#     fi
 
     run mkdir -p $package_build
     run cd $package_build

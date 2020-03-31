@@ -120,7 +120,7 @@ $ docker build -t biomedia/dhcp-structural-pipeline:latest .
 ```
 
 Login to dockerhub and push the image. The password is a special access token
-for 2fa.
+for 2fa, see gmail copy.
 
 ```
 $ docker login --username jcupitt
