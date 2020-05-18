@@ -224,6 +224,13 @@ for package in ${packages};do
     run git reset --hard $package_version
     run git submodule update
 
+    # fetal drawem is in a different branch
+    if [ $package == "MIRTK" ]; then
+      ( cd Packages/DrawEM \
+        && run echo checking out fetal drawem \
+        && run git checkout fetal )
+    fi
+
     run mkdir -p $package_build
     run cd $package_build
     run cmake $package_folder $package_cmake_flags $cxx_flags

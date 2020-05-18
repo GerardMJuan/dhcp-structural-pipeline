@@ -2,6 +2,67 @@
 
 ![pipeline image](structural_pipeline.png)
 
+## This Branch
+
+This branch is a modified version of the pipeline for fetal images. It
+works reasonably well, but you may need to tune the brain extraction step,
+see below.
+
+Mail from Antonis:
+
+```
+The pipeline installs DrawEM for the (neonatal) segmentation.
+In order to change the DrawEM to do fetal segmentation you need to do the following from inside the dhcp pipeline folder ($pipelinedir):
+# go inside the pipeline dir
+cd $pipelinedir
+# go inside the DrawEM dir
+cd build/MIRTK/Packages/DrawEM/
+# switch to the fetal branch
+git checkout fetal
+# download the fetal atlases
+wget https://biomedic.doc.ic.ac.uk/brain-development/downloads/dHCP/fetal-atlas-DrawEM.zip
+# extract the atlases
+unzip fetal-atlas-DrawEM.zip -d atlases/
+
+For the rest of the email I will consider:
+DRAWEMDIR=$pipelinedir/build/MIRTK/Packages/DrawEM
+
+
+Then you can use the fetal segmentation pipeline to segment a subject:
+$DRAWEMDIR/pipelines/fetal-pipeline.sh $T2 $age -t $cores -d $output
+where:
+$T2 the T2 image,
+$age the age of the subject in weeks
+$cores the number of CPU cores to use
+$output the output directory
+
+
+The brain mask segmentation sometimes fail in the fetal subjects.
+This is done with BET, that works well with neonates, but there is not a consistent threshold to use with fetal subjects.
+If you want to use your own brain mask you can store it in:
+$output/segmentations/${subj}_brain_mask.nii.gz
+where $subj is the same as the $T2 filename without the extension  e.g. if T2=subj1.nii.gz then subj=subj1, if T2=/home/subj2.nii.gz then subj=subj2
+
+you can generate different masks with
+bet $T2 $brain -R -f $threshold -m
+where $brain the output brain (it will also create a mask in the same folder)
+and $threshold a threshold in [0, 1] that gives larger brain estimates with smaller values
+
+
+If you want to do a rigid registration of a subject to e.g. the fetal atlas you can do:
+mirtk register $DRAWEMDIR/atlases/fetal/T2/template-$atlasage.nii.gz  $T2 -dofout $dof -model Rigid -threads $cores
+where:
+$atlasage the age of the atlas to use in weeks (integer in [23, 37])
+$dof the estimated transformation
+
+Then you can transform the subject image to the atlas space with:
+mirtk transform-image $T2 $T2tranformed -target $DRAWEMDIR/atlases/fetal/T2/template-$atlasage.nii.gz -dofin $dof -interp BSpline
+where:
+$T2transformed the transformed image
+```
+
+## Introduction
+
 The dHCP structural pipeline performs structural analysis of neonatal brain
 MRI images (T1 and T2) and consists of:
 
