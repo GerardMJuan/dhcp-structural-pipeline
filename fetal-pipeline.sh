@@ -19,16 +19,36 @@
 # limitations under the License.
 # ============================================================================
 
+# if FSLDIR is not defined, assume we need to read the FSL startup
+if [ -z ${FSLDIR+x} ]; then
+  if [ -f /etc/fsl/fsl.sh ]; then
+    . /etc/fsl/fsl.sh
+  else
+    echo FSLDIR is not set and there is no system-wide FSL startup
+    exit 1
+  fi
+fi
+
+# we need the paths set for N4, drawem etc.
+source parameters/path.sh 
+
+# double-check drawem
+if [ -n "$DRAWEMDIR" ]; then
+  [ -d "$DRAWEMDIR" ] || { echo "DRAWEMDIR environment variable invalid!" 1>&2; exit 1; }
+else
+  export DRAWEMDIR="$(cd "$(dirname "$BASH_SOURCE")"/build/MIRTK/Packages/DrawEM && pwd)"
+fi
+
 usage()
 {
   base=$(basename "$0")
   echo "usage: $base subject_T2.nii.gz scan_age [options]
-This script runs the neonatal segmentation pipeline of Draw-EM.
+This script runs the fetal segmentation pipeline of Draw-EM.
 
 Arguments:
   subject_T2.nii.gz             Nifti Image: The T2 image of the subject to be segmented.
   scan_age                      Number: Subject age in weeks. This is used to select the appropriate template for the initial registration. 
-			        If the age is <28w or >44w, it will be set to 28w or 44w respectively.
+			        If the age is <23w or >37w, it will be set to 23w or 37w respectively.
 Options:
   -d / -data-dir  <directory>   The directory used to run the script and output the files. 
   -c / -cleanup  <0/1>          Whether cleanup of temporary files is required (default: 1)
@@ -43,17 +63,11 @@ Options:
 
 
 
-if [ -n "$DRAWEMDIR" ]; then
-  [ -d "$DRAWEMDIR" ] || { echo "DRAWEMDIR environment variable invalid!" 1>&2; exit 1; }
-else
-  export DRAWEMDIR="$(cd "$(dirname "$BASH_SOURCE")"/.. && pwd)"
-fi
-
 [ $# -ge 2 ] || { usage; }
 T2=$1
 age=$2
 
-[ -f "$T2" ] || { echo "The T2 image provided as argument does not exist!" >&2; exit 1; }
+[ -f "$T2" ] || { echo "$T2 does not exist!" >&2; exit 1; }
 subj=`basename $T2  |sed -e 's:.nii.gz::g' |sed -e 's:.nii::g'`
 age=`printf "%.*f\n" 0 $age` #round
 [ $age -lt 37 ] || { age=37; }
@@ -93,8 +107,8 @@ else
 fi
 cd $datadir
 
-#version=`git -C "$DRAWEMDIR" branch | grep \* | cut -d ' ' -f2`
-#gitversion=`git -C "$DRAWEMDIR" rev-parse HEAD`
+version=`git -C "$DRAWEMDIR" branch | grep \* | cut -d ' ' -f2`
+gitversion=`git -C "$DRAWEMDIR" rev-parse HEAD`
 
 [ $verbose -le 0 ] || { echo "DrawEM multi atlas  $version (branch version: $gitversion)
 Subject:    $subj 
