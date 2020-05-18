@@ -30,13 +30,14 @@ if [ -z ${FSLDIR+x} ]; then
 fi
 
 # we need the paths set for N4, drawem etc.
-source parameters/path.sh 
+export BASEDIR="$(cd "$(dirname "$BASH_SOURCE")" && pwd)"
+source $BASEDIR/parameters/path.sh 
 
 # double-check drawem
 if [ -n "$DRAWEMDIR" ]; then
   [ -d "$DRAWEMDIR" ] || { echo "DRAWEMDIR environment variable invalid!" 1>&2; exit 1; }
 else
-  export DRAWEMDIR="$(cd "$(dirname "$BASH_SOURCE")"/build/MIRTK/Packages/DrawEM && pwd)"
+  export DRAWEMDIR="$BASEDIR/build/MIRTK/Packages/DrawEM"
 fi
 
 usage()
