@@ -245,18 +245,20 @@ run cd $pipelinebinaries_build
 run cmake $code_dir $cmake_flags $cxx_flags
 run make -j$num_cores
 
-
-
 if [ ! -d $code_dir/atlases ];then 
     echo_green "Downloading atlases"
     run $download $download_option $code_dir/fetal-atlas-DrawEM.zip "https://biomedic.doc.ic.ac.uk/brain-development/downloads/dHCP/fetal-atlas-DrawEM.zip"
     run unzip $code_dir/fetal-atlas-DrawEM.zip -d $code_dir/atlases/
     run rm $code_dir/fetal-atlas-DrawEM.zip
+
+    # we need the ALBERTs as well
+    run $download $download_option $code_dir/atlases-dhcp-structural-pipeline-v1.zip "https://biomedic.doc.ic.ac.uk/brain-development/downloads/dHCP/atlases-dhcp-structural-pipeline-v1.zip"
+    run unzip $code_dir/atlases-dhcp-structural-pipeline-v1.zip -d $code_dir
+    run rm $code_dir/atlases-dhcp-structural-pipeline-v1.zip
 fi
 if [ ! -d $DRAWEMDIR/atlases ];then 
     run ln -s $code_dir/atlases $DRAWEMDIR/atlases
 fi
-
 
 
 echo_green "Setting up environment"
