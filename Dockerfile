@@ -9,7 +9,7 @@ LABEL Description="dHCP structural-pipeline" Vendor="BioMedIA"
 # (see https://microbadger.com/#/labels)
 ARG VCS_REF
 LABEL org.label-schema.vcs-ref=$VCS_REF \
-      org.label-schema.vcs-url="https://github.com/biomedia/dhcp-structural-pipeline"
+	org.label-schema.vcs-url="https://github.com/biomedia/dhcp-structural-pipeline"
 
 # No. of threads to use for build (--build-arg THREADS=8)
 # By default, all available CPUs are used. 
@@ -31,20 +31,20 @@ ARG THREADS
 
 RUN apt-get update 
 RUN apt-get install -y \
-  bc \
-  g++-5 \
-  git \
-  libboost-dev \
-  libexpat1-dev \
+	bc \
+	g++-5 \
+	git \
+	libboost-dev \
+	libexpat1-dev \
 	libgstreamer1.0-dev \
-  libqt4-dev dc \
+	libqt4-dev dc \
 	libssl-dev \
 	libtbb-dev \
-  libxt-dev \
-  python3 \
-  unzip \
+	libxt-dev \
+	python3 \
+	unzip \
 	wget \
-  zlib1g-dev 
+	zlib1g-dev 
 
 WORKDIR /usr/local/src
 
@@ -71,7 +71,7 @@ RUN echo "please ignore the 'failed to download miniconda' error coming soon" \
 # more stuff needed by chunks of the struct pipeline when we update to latest
 # itk/vtk/mirtk
 RUN apt-get install -y \
-  libhdf5-dev 
+	libhdf5-dev 
 
 COPY . structural-pipeline
 RUN NUM_CPUS=${THREADS:-`cat /proc/cpuinfo | grep processor | wc -l`} \
@@ -80,6 +80,6 @@ RUN NUM_CPUS=${THREADS:-`cat /proc/cpuinfo | grep processor | wc -l`} \
 	&& ./setup.sh -j $NUM_CPUS
 
 WORKDIR /data
-ENTRYPOINT ["/usr/local/src/structural-pipeline/dhcp-pipeline.sh"]
+ENTRYPOINT ["/usr/src/structural-pipeline/fetal-pipeline.sh"]
 CMD ["-help"]
 
