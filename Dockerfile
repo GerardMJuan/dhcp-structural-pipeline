@@ -2,14 +2,13 @@
 ## container with all modules and applications available in the image
 
 FROM ubuntu:xenial
-MAINTAINER John Cupitt <jcupitt@gmail.com>
 LABEL Description="dHCP structural-pipeline" Vendor="BioMedIA"
 
 # Git repository and commit SHA from which this Docker image was built
 # (see https://microbadger.com/#/labels)
 ARG VCS_REF
 LABEL org.label-schema.vcs-ref=$VCS_REF \
-	org.label-schema.vcs-url="https://github.com/biomedia/dhcp-structural-pipeline"
+	org.label-schema.vcs-url="https://github.com/GerardMJuan/dhcp-structural-pipeline"
 
 # No. of threads to use for build (--build-arg THREADS=8)
 # By default, all available CPUs are used. 
@@ -59,12 +58,12 @@ RUN wget ${CMAKE_URL}/v$CMAKE_VERSION/cmake-$CMAKE_VERSION.tar.gz \
 	&& make V=0 \
 	&& make install
 
-COPY fslinstaller.py /usr/local/src
+COPY fslinstaller.py /usr/local/src/fslinstaller.py
 RUN echo "please ignore the 'failed to download miniconda' error coming soon" \
-	&& python fslinstaller.py -V 5.0.11 -q -d /usr/local/fsl \
+	&& python fslinstaller.py -d /usr/local/fsl \
 	&& export FSLDIR=/usr/local/fsl \
 	&& echo "retrying miniconda install ..." \
-	&& /usr/local/fsl/etc/fslconf/post_install.sh \
+	#&& /usr/local/fsl/etc/fslconf/post_install.sh \
 	&& mkdir -p /etc/fsl \
 	&& echo "FSLDIR=/usr/local/fsl; . \${FSLDIR}/etc/fslconf/fsl.sh; PATH=\${FSLDIR}/bin:\${PATH}; export FSLDIR PATH" > /etc/fsl/fsl.sh 
 
@@ -80,6 +79,6 @@ RUN NUM_CPUS=${THREADS:-`cat /proc/cpuinfo | grep processor | wc -l`} \
 	&& ./setup.sh -j $NUM_CPUS
 
 WORKDIR /data
-ENTRYPOINT ["/usr/src/structural-pipeline/fetal-pipeline.sh"]
+ENTRYPOINT ["/usr/local/src/structural-pipeline/fetal-pipeline.sh"]
 CMD ["-help"]
 
