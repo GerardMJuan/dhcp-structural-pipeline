@@ -79,6 +79,6 @@ RUN NUM_CPUS=${THREADS:-`cat /proc/cpuinfo | grep processor | wc -l`} \
 	&& ./setup.sh -j $NUM_CPUS
 
 WORKDIR /data
-ENTRYPOINT ["/usr/src/structural-pipeline/fetal-pipeline.sh"]
+ENTRYPOINT ["/usr/local/src/structural-pipeline/fetal-pipeline.sh"]
 CMD ["-help"]
 
