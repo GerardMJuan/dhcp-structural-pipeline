@@ -1,6 +1,7 @@
 #!/bin/bash
 
 packages="WORKBENCH ITK VTK MIRTK SPHERICALMESH"
+packages="MIRTK"
 vars="dir install git branch version folder build cmake_flags make_flags"
 
 
@@ -232,11 +233,18 @@ for package in ${packages};do
     # aee8fba is the version used in the first and second data releases
     # v1.2.1 for release 3
     # scripts/segmentation/pipeline.sh knows how to run the two versions
-    if [ $package == "MIRTK" ]; then
+    # if [ $package == "MIRTK" ]; then
     #   ( cd Packages/DrawEM && git checkout aee8fba )
+    #   ( cd Packages/DrawEM \
+    #     && run echo checking out drawem 121 \
+    #     && git checkout v1.2.1 )
+    # fi
+
+    # fetal drawem is in a different branch
+    if [ $package == "MIRTK" ]; then
       ( cd Packages/DrawEM \
-        && run echo checking out drawem 121 \
-        && git checkout v1.2.1 )
+        && run echo checking out fetal drawem \
+        && run git checkout fetal )
     fi
 
     run mkdir -p $package_build
