@@ -25,11 +25,18 @@ export MNI_mask=$code_dir/atlases/MNI/MNI152_T1_1mm_facemask.nii.gz
 export MNI_dofs=$code_dir/atlases/non-rigid-v2/dofs-MNI
 
 # Average space atlas name, T2 and warps
-export template_name="non-rigid-v2"
-export template_T2=$code_dir/atlases/non-rigid-v2/T2
-export template_dofs=$code_dir/atlases/non-rigid-v2/dofs
-export template_min_age=28
-export template_max_age=44
+#export template_name="non-rigid-v2"
+#export template_T2=$code_dir/atlases/non-rigid-v2/T2
+#export template_dofs=$code_dir/atlases/non-rigid-v2/dofs
+#export template_min_age=28
+#export template_max_age=44
+
+export template_name="fetal"
+export template_T2=$code_dir/perinatal/perinatal_atlases/$template_name/T2
+export template_mask=$code_dir/perinatal/perinatal_atlases/$template_name/mask
+export template_min_age=21
+export template_max_age=38
+
 
 # registration parameters
 export registration_config=$parameters_dir/ireg-structural.cfg

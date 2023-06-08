@@ -62,6 +62,24 @@ Options:
   exit;
 }
 
+# log function for completion
+runpipeline()
+{
+  pipeline=$1
+  shift
+  log=$logdir/$subj.$pipeline.log
+  err=$logdir/$subj.$pipeline.err
+  echo "running $pipeline pipeline"
+  echo "$@"
+  "$@" >$log 2>$err
+  if [ ! $? -eq 0 ]; then
+    echo "Pipeline failed: see log files $log $err for details"
+    exit 1
+  fi
+  echo "-----------------------"
+}
+
+
 
 
 [ $# -ge 2 ] || { usage; }
@@ -164,6 +182,16 @@ run_script postprocess.sh       $subj
 
 # if probability maps are required
 [ "$posteriors" == "0" -o "$posteriors" == "no" -o "$posteriors" == "false" ] || run_script postprocess-pmaps.sh $subj
+
+# segmentation
+runpipeline segmentation $scriptdir/segmentation/pipeline.sh $T2 $subj $age -d $workdir -t $threads
+
+# generate some additional files
+runpipeline additional $scriptdir/misc/pipeline.sh $subj $age -d $workdir -t $threads
+
+# surface extraction
+runpipeline surface $scriptdir/surface/pipeline.sh $subj -d $workdir -t $threads
+
 
 # cleanup
 if [ "$cleanup" == "1" -o "$cleanup" == "yes" -o "$cleanup" == "true" ] && [ -f "segmentations/${subj}_labels.nii.gz" ];then
