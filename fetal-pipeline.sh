@@ -152,9 +152,8 @@ run()
 
 # infodir=$datadir/info 
 logdir=$datadir/logs
-workdir=$datadir/workdir/$subj
 # mkdir -p $infodir
-mkdir -p $workdir $logdir
+mkdir -p $logdir
 
 # make run function global
 typeset -fx run
@@ -195,14 +194,16 @@ codedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 scriptdir=$codedir/scripts
 
+# remove specific workdir
+
 # segmentation
-runpipeline segmentation $scriptdir/segmentation/pipeline.sh $T2 $subj $age -d $workdir -t $threads
+runpipeline segmentation $scriptdir/segmentation/pipeline.sh $T2 $subj $age -t $threads
 
 # generate some additional files
-runpipeline additional $scriptdir/misc/pipeline.sh $subj $age -d $workdir -t $threads
+runpipeline additional $scriptdir/misc/pipeline.sh $subj $age -t $threads
 
 # surface extraction
-runpipeline surface $scriptdir/surface/pipeline.sh $subj -d $workdir -t $threads
+runpipeline surface $scriptdir/surface/pipeline.sh $subj -t $threads
 
 
 # cleanup
