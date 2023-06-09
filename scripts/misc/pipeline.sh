@@ -138,7 +138,7 @@ fi
 
 
 if [ ! -f $subj-template-$age-n.dof.gz ];then
-  run mirtk register $Tmasked $template_T2/template-$age.nii.gz -dofout dofs/$subj-template-$age-n.dof.gz -parin $registration_config_template -threads $threads -v 0
+  run mirtk register $T2masked $template_T2/template-$age.nii.gz -dofout dofs/$subj-template-$age-n.dof.gz -parin $registration_config_template -threads $threads -v 0
 fi
 
 if [ ! -f dofs/$subj-template-$age-r.dof.gz ];then
@@ -147,7 +147,7 @@ fi
 
 if [ ! -f dofs/template-$age-$subj-n.dof.gz ];then
   run mirtk invert-dof dofs/$subj-template-$age-n.dof.gz dofs/template-$age-$subj-i.dof.gz
-  run mirtk register $template_T2/template-$age.nii.gz $Tmasked -dofin dofs/template-$age-$subj-i.dof.gz -dofout dofs/template-$age-$subj-n.dof.gz -parin $registration_config_template -threads $threads -v 0
+  run mirtk register $template_T2/template-$age.nii.gz $T2masked -dofin dofs/template-$age-$subj-i.dof.gz -dofout dofs/template-$age-$subj-n.dof.gz -parin $registration_config_template -threads $threads -v 0
   run rm dofs/template-$age-$subj-i.dof.gz 
 fi
 

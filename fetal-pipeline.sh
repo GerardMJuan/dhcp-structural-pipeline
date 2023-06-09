@@ -195,6 +195,7 @@ codedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 scriptdir=$codedir/scripts
 
 # remove specific workdir variable, its empty
+workdir=`pwd`
 
 # segmentation
 runpipeline segmentation $scriptdir/segmentation/pipeline.sh $T2 $subj $age -d $workdir -t $threads
