@@ -32,8 +32,8 @@ export MNI_dofs=$code_dir/atlases/non-rigid-v2/dofs-MNI
 #export template_max_age=44
 
 export template_name="fetal"
-export template_T2=$code_dir/perinatal/perinatal_atlases/$template_name/T2
-export template_mask=$code_dir/perinatal/perinatal_atlases/$template_name/mask
+export template_T2=$code_dir/atlases/$template_name/T2
+export template_mask=$code_dir/atlases/$template_name/mask
 export template_min_age=21
 export template_max_age=38
 

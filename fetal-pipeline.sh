@@ -79,9 +79,6 @@ runpipeline()
   echo "-----------------------"
 }
 
-
-
-
 [ $# -ge 2 ] || { usage; }
 T2=$1
 age=$2
@@ -153,6 +150,12 @@ run()
   fi
 }
 
+# infodir=$datadir/info 
+logdir=$datadir/logs
+workdir=$datadir/workdir/$subj
+# mkdir -p $infodir
+mkdir -p $workdir $logdir
+
 # make run function global
 typeset -fx run
 
@@ -166,22 +169,31 @@ run_script()
   fi
 }
 
-rm -f logs/$subj logs/$subj-err
-run_script preprocess.sh        $subj
-# phase 1 tissue segmentation
-run_script fetal-tissue-priors.sh     $subj $age $atlasname $threads
-# registration using gm posterior + image
-run_script register-multi-atlas-using-gm-posteriors.sh $subj $age $threads
-# structural segmentation
-run_script labels-multi-atlas.sh   $subj
-run_script segmentation.sh      $subj
-# post-processing
-run_script separate-hemispheres.sh  $subj
-run_script correct-segmentation.sh  $subj
-run_script postprocess.sh       $subj
+if [ ! -f segmentations/${subj}_all_labels.nii.gz ];then
+
+  rm -f logs/$subj logs/$subj-err
+  run_script preprocess.sh        $subj
+  # phase 1 tissue segmentation
+  run_script fetal-tissue-priors.sh     $subj $age $atlasname $threads
+  # registration using gm posterior + image
+  run_script register-multi-atlas-using-gm-posteriors.sh $subj $age $threads
+  # structural segmentation
+  run_script labels-multi-atlas.sh   $subj
+  run_script segmentation.sh      $subj
+  # post-processing
+  run_script separate-hemispheres.sh  $subj
+  run_script correct-segmentation.sh  $subj
+  run_script postprocess.sh       $subj
+fi
 
 # if probability maps are required
 [ "$posteriors" == "0" -o "$posteriors" == "no" -o "$posteriors" == "false" ] || run_script postprocess-pmaps.sh $subj
+
+# check whether the different tools are set and load parameters
+codedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+. $codedir/parameters/configuration.sh
+
+scriptdir=$codedir/scripts
 
 # segmentation
 runpipeline segmentation $scriptdir/segmentation/pipeline.sh $T2 $subj $age -d $workdir -t $threads
