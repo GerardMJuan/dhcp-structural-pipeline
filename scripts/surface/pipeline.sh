@@ -162,7 +162,8 @@ if [ -f restore/T1/$subj.nii.gz ];then
 fi
 
 if [ ! -f $outwb/$subj.T2.nii.gz ];then
-  ln restore/T2/${subj}_restore_defaced.nii.gz $outwb/$subj.T2.nii.gz
+#  ln restore/T2/${subj}_restore_defaced.nii.gz $outwb/$subj.T2.nii.gz
+ ln restore/T2/${subj}_restore.nii.gz $outwb/$subj.T2.nii.gz
 fi
 
 # add them to .spec file
