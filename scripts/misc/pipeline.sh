@@ -130,11 +130,11 @@ fi
 # fi
 
 # deface images
-for m in T1 T2; do
-  if [ -f $m/$subj.nii.gz -a ! -f restore/$m/${subj}_restore_defaced.nii.gz ]; then
-    deface_image $m
-  fi
-done
+#for m in T1 T2; do
+#  if [ -f $m/$subj.nii.gz -a ! -f restore/$m/${subj}_restore_defaced.nii.gz ]; #then
+#    deface_image $m
+#  fi
+#done
 
 
 if [ ! -f $subj-template-$age-n.dof.gz ];then

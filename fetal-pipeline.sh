@@ -194,16 +194,16 @@ codedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 scriptdir=$codedir/scripts
 
-# remove specific workdir
+# remove specific workdir variable, its empty
 
 # segmentation
-runpipeline segmentation $scriptdir/segmentation/pipeline.sh $T2 $subj $age -t $threads
+runpipeline segmentation $scriptdir/segmentation/pipeline.sh $T2 $subj $age -d $workdir -t $threads
 
 # generate some additional files
-runpipeline additional $scriptdir/misc/pipeline.sh $subj $age -t $threads
+runpipeline additional $scriptdir/misc/pipeline.sh $subj $age -d $workdir -t $threads
 
 # surface extraction
-runpipeline surface $scriptdir/surface/pipeline.sh $subj -t $threads
+runpipeline surface $scriptdir/surface/pipeline.sh $subj -d $workdir -t $threads
 
 
 # cleanup
