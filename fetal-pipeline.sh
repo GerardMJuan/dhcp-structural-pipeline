@@ -173,7 +173,7 @@ if [ ! -f segmentations/${subj}_all_labels.nii.gz ];then
   rm -f logs/$subj logs/$subj-err
   run_script preprocess.sh        $subj
   # phase 1 tissue segmentation
-  run_script fetal-tissue-priors.sh     $subj $age $atlasname $threads
+  run_script fetal-tissue-priors.sh     $subj $age $atlasname 1 # no multhreading, weird errors happen when running in parallel
   # registration using gm posterior + image
   run_script register-multi-atlas-using-gm-posteriors.sh $subj $age $threads
   # structural segmentation
