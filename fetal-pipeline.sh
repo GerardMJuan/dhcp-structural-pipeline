@@ -199,8 +199,7 @@ if [[ "$analysis" == "all" || "$analysis" == "seg" ]] && [[ ! -f "segmentations/
   [ "$posteriors" == "0" -o "$posteriors" == "no" -o "$posteriors" == "false" ] || run_script postprocess-pmaps.sh $subj
 fi
 
-
-if [ "$analysis" == "all" || "$analysis" == "surf" ]; then
+if [[ "$analysis" == "all" || "$analysis" == "surf" ]]; then
   # check whether the different tools are set and load parameters
   codedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
   . $codedir/parameters/configuration.sh
