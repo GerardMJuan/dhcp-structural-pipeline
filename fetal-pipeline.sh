@@ -58,6 +58,9 @@ Options:
   -t / -threads  <number>       Number of threads (CPU cores) allowed for the registration to run in parallel (default: 1)
   -v / -verbose  <0/1>          Whether the script progress is reported (default: 1)
   -h / -help / --help           Print usage.
+  -all                          Run all the pipelines (segmentation, surface extraction)
+  -seg                          Run only the segmentation pipeline
+  -surf                         Run only the surface extraction pipeline
 "
   exit;
 }
@@ -100,6 +103,8 @@ command="$@"
 
 atlasname=fetal
 
+analysis=all
+
 while [ $# -gt 0 ]; do
   case "$3" in
     -c|-cleanup)  shift; cleanup=$3; ;;
@@ -109,6 +114,9 @@ while [ $# -gt 0 ]; do
     -t|-threads)  shift; threads=$3; ;; 
     -v|-verbose)  shift; verbose=$3; ;; 
     -h|-help|--help) usage; ;;
+    -all) analysis="all"; ;;
+    -seg) analysis="seg"; ;;
+    -surf) analysis="surf"; ;;
     -*) echo "$0: Unrecognized option $1" >&2; usage; ;;
      *) break ;;
   esac
@@ -168,7 +176,10 @@ run_script()
   fi
 }
 
-if [ ! -f segmentations/${subj}_all_labels.nii.gz ];then
+## run the pipeline
+
+# segmentation
+if [[ "$analysis" == "all" || "$analysis" == "seg" ]] && [[ ! -f "segmentations/${subj}_all_labels.nii.gz" ]]; then
 
   rm -f logs/$subj logs/$subj-err
   run_script preprocess.sh        $subj
@@ -183,29 +194,31 @@ if [ ! -f segmentations/${subj}_all_labels.nii.gz ];then
   run_script separate-hemispheres.sh  $subj
   run_script correct-segmentation.sh  $subj
   run_script postprocess.sh       $subj
+
+  # if probability maps are required
+  [ "$posteriors" == "0" -o "$posteriors" == "no" -o "$posteriors" == "false" ] || run_script postprocess-pmaps.sh $subj
 fi
 
-# if probability maps are required
-[ "$posteriors" == "0" -o "$posteriors" == "no" -o "$posteriors" == "false" ] || run_script postprocess-pmaps.sh $subj
 
-# check whether the different tools are set and load parameters
-codedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-. $codedir/parameters/configuration.sh
+if [ "$analysis" == "all" || "$analysis" == "surf" ]; then
+  # check whether the different tools are set and load parameters
+  codedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  . $codedir/parameters/configuration.sh
 
-scriptdir=$codedir/scripts
+  scriptdir=$codedir/scripts
 
-# remove specific workdir variable, its empty
-workdir=`pwd`
+  # remove specific workdir variable, its empty
+  workdir=`pwd`
 
-# segmentation
-runpipeline segmentation $scriptdir/segmentation/pipeline.sh $T2 $subj $age -d $workdir -t $threads
+  # segmentation (does not actually run segmentation, but prepares some files for the surface extraction)
+  runpipeline segmentation $scriptdir/segmentation/pipeline.sh $T2 $subj $age -d $workdir -t $threads
 
-# generate some additional files
-runpipeline additional $scriptdir/misc/pipeline.sh $subj $age -d $workdir -t $threads
+  # generate some additional files
+  runpipeline additional $scriptdir/misc/pipeline.sh $subj $age -d $workdir -t $threads
 
-# surface extraction
-runpipeline surface $scriptdir/surface/pipeline.sh $subj -d $workdir -t $threads
-
+  # surface extraction
+  runpipeline surface $scriptdir/surface/pipeline.sh $subj -d $workdir -t $threads
+fi
 
 # cleanup
 if [ "$cleanup" == "1" -o "$cleanup" == "yes" -o "$cleanup" == "true" ] && [ -f "segmentations/${subj}_labels.nii.gz" ];then
