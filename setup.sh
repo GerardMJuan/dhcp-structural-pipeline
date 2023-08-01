@@ -247,12 +247,13 @@ for package in ${packages};do
         && run git checkout fetal )
       
       # copy and save fetal_tissue_priors.sh and register-multi-atlas-using-gm-posteriors.sh
-      run cp scripts/fetal-tissue-priors.sh /usr/local/src/structural-pipeline/fetal-tissue-priors.sh
-      run cp scripts/register-multi-atlas-using-gm-posteriors.sh /usr/local/src/structural-pipeline/register-multi-atlas-using-gm-posteriors.sh
+      # very DIRTY
+      run mkdir -p /usr/local/src/structural-pipeline/fetal_scripts/
+      run cp -R scripts/* /usr/local/src/structural-pipeline/fetal_scripts
+
       run echo checking out to master with fetal script
       run git checkout master
-      run mv /usr/local/src/structural-pipeline/register-multi-atlas-using-gm-posteriors.sh scripts/register-multi-atlas-using-gm-posteriors.sh
-      run mv /usr/local/src/structural-pipeline/fetal-tissue-priors.sh scripts/fetal-tissue-priors.sh
+      run cp -R /usr/local/src/structural-pipeline/fetal_scripts/ scripts/
 
     fi
 
