@@ -193,7 +193,8 @@ if  [ ! -f $outwb/$subj.$h.$surf.native.label.gii ];then
   if [ -f "$segdir/${subj}_hemis_labels.nii.gz" ]; then
     # for the new file, CSF is label 17 and backgroudn is 18
     # exclude csf,out and dilate tissues to cover space
-    run mirtk padding $segdir/{subj}_hemis_labels.nii.gz $segdir/{subj}_hemis_labels.nii.gz $outvtk/$hs.mask.nii.gz 2 17 18 0 
+    echo "Using $segdir/${subj}_hemis_labels.nii.gz"
+    run mirtk padding $segdir/${subj}_hemis_labels.nii.gz $segdir/${subj}_hemis_labels.nii.gz $outvtk/$hs.mask.nii.gz 2 17 18 0 
     # exclude subcortical structures and dilate cortical labels to cover space
   else
     # exclude csf,out and dilate tissues to cover space

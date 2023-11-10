@@ -96,6 +96,7 @@ done
 # if not, use $surface_recon_config
 if [ -f "$segdir/${subj}_hemis_labels.nii.gz" ]; then
     # If file $subj_hemis_labels.nii.gz exists, use $surface_recon_config_hemis_labels
+    echo "Using $surface_recon_config_hemis_labels"
     surface_recon_config=$surface_recon_config_hemis_labels
 else
     # If not, use $surface_recon_config
