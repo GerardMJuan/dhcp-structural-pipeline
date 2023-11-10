@@ -190,6 +190,7 @@ if [[ "$analysis" == "all" || "$analysis" == "seg" ]] && [[ ! -f "segmentations/
   # structural segmentation
   run_script labels-multi-atlas.sh   $subj
   run_script segmentation.sh      $subj
+  
   # post-processing
   run_script separate-hemispheres.sh  $subj
   run_script correct-segmentation.sh  $subj

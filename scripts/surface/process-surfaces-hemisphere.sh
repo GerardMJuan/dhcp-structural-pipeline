@@ -188,11 +188,23 @@ if  [ ! -f $outwb/$subj.$h.$surf.native.label.gii ];then
   echo
   echo "-------------------------------------------------------------------------------------"
   echo "Project $h Draw-EM labels"
-  # exclude csf,out and dilate tissues to cover space
-  run mirtk padding $segdir/${subj}_tissue_labels.nii.gz $segdir/${subj}_tissue_labels.nii.gz $outvtk/$hs.mask.nii.gz 2 $CSF_label $BG_label 0 
+
+  # if it exist, use it, as it was a correction
+  if [ -f "$segdir/${subj}_hemis_labels.nii.gz" ]; then
+    # for the new file, CSF is label 17 and backgroudn is 18
+    # exclude csf,out and dilate tissues to cover space
+    run mirtk padding $segdir/{subj}_hemis_labels.nii.gz $segdir/{subj}_hemis_labels.nii.gz $outvtk/$hs.mask.nii.gz 2 17 18 0 
+    # exclude subcortical structures and dilate cortical labels to cover space
+  else
+    # exclude csf,out and dilate tissues to cover space
+    run mirtk padding $segdir/${subj}_tissue_labels.nii.gz $segdir/${subj}_tissue_labels.nii.gz $outvtk/$hs.mask.nii.gz 2 $CSF_label $BG_label 0 
+    # exclude subcortical structures and dilate cortical labels to cover space
+  end 
+
   run dilate-labels $outvtk/$hs.mask.nii.gz $outvtk/$hs.mask.nii.gz -blur 1
-  # exclude subcortical structures and dilate cortical labels to cover space
+  # Note: if corrected, this will NOT change: need to correct the original
   run mirtk padding $segdir/${subj}_labels.nii.gz $segdir/${subj}_labels.nii.gz $outvtk/$hs.labels.nii.gz `echo $cortical_structures|wc -w` $cortical_structures 0 -invert
+
   if [ "$h" == "L" ];then oh=R;else oh=L;fi
   run mirtk padding $outvtk/$hs.labels.nii.gz $segdir/${subj}_${oh}_pial.nii.gz $outvtk/$hs.labels.nii.gz 1 0 
   run dilate-labels $outvtk/$hs.labels.nii.gz $outvtk/$hs.labels.nii.gz -blur 1

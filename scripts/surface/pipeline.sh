@@ -91,6 +91,17 @@ for surf in white pial;do
     done
 done
 
+# define the surface recon config
+# if file $subj_hemis_labels.nii.gz exists, the config file to use is $surface_recon_config_hemis_labels
+# if not, use $surface_recon_config
+if [ -f "$segdir/${subj}_hemis_labels.nii.gz" ]; then
+    # If file $subj_hemis_labels.nii.gz exists, use $surface_recon_config_hemis_labels
+    surface_recon_config=$surface_recon_config_hemis_labels
+else
+    # If not, use $surface_recon_config
+    surface_recon_config=$surface_recon_config
+fi
+
 if [ $completed -eq 0 ]; then
     run mirtk recon-neonatal-cortex -v --threads=$threads --config="$surface_recon_config" --sessions="$subj" --prefix="$outvtk/$subj" --temp="$outvtk/temp-recon/$subj" --white --pial
     rm -r $outvtk/temp-recon
