@@ -200,7 +200,7 @@ if  [ ! -f $outwb/$subj.$h.$surf.native.label.gii ];then
     # exclude csf,out and dilate tissues to cover space
     run mirtk padding $segdir/${subj}_tissue_labels.nii.gz $segdir/${subj}_tissue_labels.nii.gz $outvtk/$hs.mask.nii.gz 2 $CSF_label $BG_label 0 
     # exclude subcortical structures and dilate cortical labels to cover space
-  end 
+  fi
 
   run dilate-labels $outvtk/$hs.mask.nii.gz $outvtk/$hs.mask.nii.gz -blur 1
   # Note: if corrected, this will NOT change: need to correct the original
