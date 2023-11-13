@@ -203,15 +203,22 @@ if  [ ! -f $outwb/$subj.$h.$surf.native.label.gii ];then
   fi
 
   run dilate-labels $outvtk/$hs.mask.nii.gz $outvtk/$hs.mask.nii.gz -blur 1
+
   # Note: if corrected, this will NOT change: need to correct the original
   run mirtk padding $segdir/${subj}_labels.nii.gz $segdir/${subj}_labels.nii.gz $outvtk/$hs.labels.nii.gz `echo $cortical_structures|wc -w` $cortical_structures 0 -invert
 
   if [ "$h" == "L" ];then oh=R;else oh=L;fi
   run mirtk padding $outvtk/$hs.labels.nii.gz $segdir/${subj}_${oh}_pial.nii.gz $outvtk/$hs.labels.nii.gz 1 0 
   run dilate-labels $outvtk/$hs.labels.nii.gz $outvtk/$hs.labels.nii.gz -blur 1
-
+  
   # project to surface
-  run mirtk padding $outvtk/$hs.labels.nii.gz $outvtk/$hs.mask.nii.gz $outvtk/$hs.labels.nii.gz 2 2 3 -100 -invert
+  if [ -f "$segdir/${subj}_hemis_labels.nii.gz" ]; then
+    run mirtk padding $outvtk/$hs.labels.nii.gz $outvtk/$hs.mask.nii.gz $outvtk/$hs.labels.nii.gz 4 5 6 7 8 -100 -invert
+  else
+    run mirtk padding $outvtk/$hs.labels.nii.gz $outvtk/$hs.mask.nii.gz $outvtk/$hs.labels.nii.gz 2 2 3 -100 -invert
+  fi
+
+
   run extend-image-slices $outvtk/$hs.labels.nii.gz $outvtk/$hs.labels.ext.nii.gz -xyz 10
   # TODO: replace the next (uncommented) line with the following
   run mirtk project-onto-surface $outvtk/$subj.$h.$insurf1.native.surf.vtk $outvtk/$subj.$h.$surf.native.label.vtk -labels $outvtk/$hs.labels.ext.nii.gz -name curv -pointdata -smooth 10 -fill -min-ratio 0.05 
