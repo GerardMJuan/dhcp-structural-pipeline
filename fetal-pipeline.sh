@@ -61,6 +61,7 @@ Options:
   -all                          Run all the pipelines (segmentation, surface extraction)
   -seg                          Run only the segmentation pipeline
   -surf                         Run only the surface extraction pipeline
+  -rerun-surf                   Rerun the surface extraction assuming that manual modifications have been done to pial and white in vtk folder.
 "
   exit;
 }
@@ -104,6 +105,7 @@ command="$@"
 atlasname=fetal
 
 analysis=all
+rerunsurf=0
 
 while [ $# -gt 0 ]; do
   case "$3" in
@@ -117,6 +119,7 @@ while [ $# -gt 0 ]; do
     -all) analysis="all"; ;;
     -seg) analysis="seg"; ;;
     -surf) analysis="surf"; ;;
+    -rerun-surf) rerunsurf=1; ;;
     -*) echo "$0: Unrecognized option $1" >&2; usage; ;;
      *) break ;;
   esac
@@ -217,7 +220,7 @@ if [[ "$analysis" == "all" || "$analysis" == "surf" ]]; then
   runpipeline additional $scriptdir/misc/pipeline.sh $subj $age -d $workdir -t $threads
 
   # surface extraction
-  runpipeline surface $scriptdir/surface/pipeline.sh $subj -d $workdir -t $threads
+  runpipeline surface $scriptdir/surface/pipeline.sh $subj -d $workdir -t $threads -rerunsurf $rerunsurf
 fi
 
 # cleanup

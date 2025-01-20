@@ -47,6 +47,9 @@ export registration_config_template=$parameters_dir/ireg.cfg
 export surface_recon_config=$parameters_dir/recon-neonatal-cortex2.cfg
 # Identic config file but for a simpler segmentation, easier for manual correction
 export surface_recon_config_hemis_labels=$parameters_dir/recon-neonatal-cortex2-hemis.cfg
+# tissue config
+export surface_recon_config_tissue=$parameters_dir/recon-neonatal-cortex-tissue.cfg
+
 
 # log function
 run()
