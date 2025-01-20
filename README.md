@@ -2,6 +2,30 @@
 
 ![pipeline image](structural_pipeline.png)
 
+## Changes from fetal dHCP pipeline (available at https://github.com/BioMedIA/dhcp-structural-pipeline/tree/fetal)
+- Improvements at setup.sh
+    - Use ITK version v5.1.2
+    - Use VTK version v8.2.0
+    - Automatically install MIRTK fetal branch
+  This fixes a bunch of bugs in the original pipeline.
+
+- Added various flags to the pipeline to allow for partial pipeline execution_
+    -all                          Run all the pipelines (segmentation, surface extraction)
+    -seg                          Run only the segmentation pipeline
+    -surf                         Run only the surface extraction pipeline
+    -rerun-surf                   Rerun the surface extraction assuming that manual modifications have been done to pial and white in vtk 
+
+- Modified thread handling in fetal-tissue-priors.sh to avoid parallel processing issues. Issue still happening, though. Open issue: sometimes during this part of the script, it just fails. Cannot reproduce it in a controlled environment.
+
+The pipeline can be found in Dockerhub, at:
+
+```
+https://hub.docker.com/r/gerardmartijuan/dhcp-pipeline-multifact
+```
+
+Original readme goes as follows:
+
+
 ## This Branch
 
 This branch is a modified version of the pipeline for fetal images. It

@@ -5,7 +5,6 @@ For the third data release we've made the following changes:
 2. New defacer. Previously, we used the FSL defacer, which was based on adult
 brains and could occasionally fail. The new defacer should be more reliable.
 
-
 The following changes have been made in the dHCP Structural Pipeline v1.1 compared to v1.0:
 - T1 is registered to T2 with an initial rigid registration, and a consequent BBR registration
 - Myelin mapping (T1/T2 ratio) is calculated prior to bias field correction
